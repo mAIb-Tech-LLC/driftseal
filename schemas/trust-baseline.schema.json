@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://drift.maib.io/schemas/trust-baseline.schema.json",
+  "title": "DriftSeal TrustBaseline v1",
+  "type": "object",
+  "required": ["schema_version", "id", "target_type", "identifier", "artifact_sha256", "tools", "tool_surface_hash", "capabilities", "findings", "scanner_version", "ruleset_version", "scanned_at", "coverage"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "format": "uuid"},
+    "organisation_id": {"type": ["string", "null"]},
+    "user_id": {"type": ["string", "null"]},
+    "target_type": {"enum": ["npm", "pypi", "github", "mcp", "manifest", "archive", "local"]},
+    "identifier": {"type": "string"},
+    "resolved_version": {"type": ["string", "null"]},
+    "source_url": {"type": ["string", "null"]},
+    "source_commit_sha": {"type": ["string", "null"]},
+    "artifact_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "tool_surface_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "integrity": {"type": "object"},
+    "package_metadata": {"type": "object"},
+    "dependencies": {"type": "object"},
+    "tools": {"type": "array", "items": {"type": "object", "required": ["name", "description", "inputSchema", "annotations", "capabilities", "path"]}},
+    "capabilities": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "findings": {"type": "array", "items": {"type": "object", "required": ["id", "type", "old_value", "new_value", "affected_path", "severity", "evidence", "why_it_matters", "confidence", "recommendation"]}},
+    "scanner_version": {"type": "string"},
+    "ruleset_version": {"type": "string"},
+    "scanned_at": {"type": "string", "format": "date-time"},
+    "coverage": {"type": "object", "required": ["level", "limitations"]}
+  }
+}
+

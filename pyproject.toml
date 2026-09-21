@@ -1,0 +1,14 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+[project]
+name = "driftseal"
+version = "0.1.0"
+description = "Deterministic trust drift evidence for agent supply chains"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+dependencies = []
+[project.scripts]
+driftseal = "driftseal.cli:main"
+[project.optional-dependencies]
+dev = ["pytest>=8"]
