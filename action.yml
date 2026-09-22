@@ -10,6 +10,12 @@ inputs:
   fail-on:
     description: Minimum finding severity that fails the job
     default: critical
+  telemetry:
+    description: Opt in to anonymous stage counts (no source, repository name or findings)
+    default: 'false'
+  installation-id:
+    description: Optional random identifier for opt-in installation counting; never use a repository name
+    default: ''
 outputs:
   result:
     description: JSON result path
@@ -29,6 +35,7 @@ runs:
         DRIFTSEAL_TARGET: ${{ inputs.path }}
         DRIFTSEAL_BASELINE: ${{ inputs.baseline }}
         DRIFTSEAL_FAIL_ON: ${{ inputs.fail-on }}
+        DRIFTSEAL_TELEMETRY: ${{ inputs.telemetry }}
+        DRIFTSEAL_INSTALLATION_ID: ${{ inputs.installation-id }}
         PYTHONPATH: ${{ github.action_path }}
       run: python "${{ github.action_path }}/scripts/action_scan.py"
-

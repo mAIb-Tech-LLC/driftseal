@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 
+from driftseal.conversion import watch_url
 from driftseal.diff import compare, sarif
 from driftseal.runner import isolated_scan
 
@@ -24,7 +25,36 @@ if os.getenv("GITHUB_STEP_SUMMARY"):
         for item in findings[:30]:
             out.write(f"- **{item['severity'].upper()}** `{item['type']}`\n")
         out.write("\nReview the JSON/SARIF artifact for evidence. A clean scan does not guarantee security.\n")
+        out.write(
+            "\nA point-in-time scan is not continuous trust monitoring. Want to know when this changes later?\n\n[WATCH THIS COMPONENT]("
+            + watch_url(source="github-action")
+            + ") · [Approve a baseline](https://drift.maib.io/docs/github-action?source=github-action)\n\nLocal source and detailed findings are never uploaded to DriftSeal. Anonymous stage reporting is disabled unless explicitly enabled. The link opens the public-component workflow; private repositories stay local.\n"
+        )
 levels = {"none": 99, "info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
+if os.getenv("DRIFTSEAL_TELEMETRY", "false").lower() == "true":
+    # Explicit opt-in; no repository identity, source, coordinate or findings leave CI.
+    import re
+    import urllib.request
+    import uuid
+
+    installation = os.getenv("DRIFTSEAL_INSTALLATION_ID", "")
+    if not re.fullmatch(r"[a-f0-9-]{36}", installation):
+        installation = None
+    try:
+        payload = {
+            "run_id": str(uuid.uuid4()),
+            "installation_id": installation,
+            "baseline_compared": baseline.is_file(),
+        }
+        request = urllib.request.Request(
+            "https://drift.maib.io/api/action-events",
+            data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(request, timeout=5):
+            pass
+    except Exception:
+        pass  # Acquisition telemetry never changes a security check's result.
 threshold = os.environ.get("DRIFTSEAL_FAIL_ON", "critical")
 if threshold not in levels:
     raise SystemExit("Invalid fail-on severity")

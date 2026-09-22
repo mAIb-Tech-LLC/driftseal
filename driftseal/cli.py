@@ -173,6 +173,15 @@ def main(argv=None):
             Path(args.output).write_text(rendered + "\n")
         else:
             print(rendered)
+        if args.command in {"scan", "baseline", "diff"} and not args.json and not args.sarif:
+            from .conversion import watch_url
+
+            report = new if args.command == "diff" else result
+            print(
+                "\nA point-in-time scan does not provide continuous monitoring.\nWant to know when this changes later? WATCH THIS COMPONENT: "
+                + watch_url(report),
+                file=sys.stderr,
+            )
         levels = {"none": 99, "info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
         return 1 if any(levels[f["severity"]] >= levels[args.fail_on] for f in findings) else 0
     except Exception as exc:
