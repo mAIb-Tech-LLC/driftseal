@@ -12,3 +12,16 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install -e '.[dev]'
       - run: python -m pytest -q
+      - name: Prepare benign Action fixture
+        run: |
+          mkdir -p /tmp/driftseal-action-fixture
+          python -c 'from pathlib import Path; Path("/tmp/driftseal-action-fixture/tools.json").write_text("{\"tools\": []}")'
+      - uses: ./
+        with:
+          path: /tmp/driftseal-action-fixture
+          fail-on: critical
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: driftseal-action-evidence
+          path: ${{ runner.temp }}/driftseal-results/
