@@ -5,9 +5,9 @@ import os
 from pathlib import Path
 
 from driftseal.diff import compare, sarif
-from driftseal.scanner import scan_local
+from driftseal.runner import isolated_scan
 
-report = scan_local(os.environ.get("DRIFTSEAL_TARGET", "."))
+report = isolated_scan({"kind": "local", "target": str(Path(os.environ.get("DRIFTSEAL_TARGET", ".")).absolute())})
 baseline = Path(os.environ.get("DRIFTSEAL_BASELINE", ".driftseal-baseline.json"))
 findings = compare(json.loads(baseline.read_text()), report) if baseline.is_file() else report["findings"]
 directory = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / "driftseal-results"

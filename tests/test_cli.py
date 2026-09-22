@@ -28,6 +28,16 @@ def test_isolated_process_manifest():
     assert result["tools"] == []
 
 
+def test_untrusted_cwd_cannot_shadow_scanner(tmp_path, monkeypatch):
+    package = tmp_path / "driftseal"
+    package.mkdir()
+    marker = tmp_path / "executed"
+    (package / "__init__.py").write_text("from pathlib import Path\nPath(" + repr(str(marker)) + ').write_text("bad")')
+    monkeypatch.chdir(tmp_path)
+    result = isolated_scan({"kind": "manifest", "content": '{"tools":[]}'})
+    assert result["tools"] == [] and not marker.exists()
+
+
 def test_action_fixture(tmp_path):
     target = tmp_path / "target"
     target.mkdir()

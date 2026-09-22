@@ -162,6 +162,8 @@ def analyze(files, baseline=None):
                         )
                     )
                 tool_names.add(t["name"])
+                if len(b["tools"]) >= 250:
+                    raise Rejected("Total component tool count exceeds 250")
                 b["tools"].append(redact(t))
             for key in ["permissions", "filesystem_scopes"]:
                 if isinstance(obj.get(key), list):
@@ -219,6 +221,8 @@ def scan_local(path):
     candidates = [root] if root.is_file() else root.rglob("*")
     for p in candidates:
         relative = p.name if root.is_file() else p.relative_to(root).as_posix()
+        if not root.is_file() and p.name == ".driftseal-baseline.json":
+            continue
         if any(part in {".git", ".venv", "node_modules", ".driftseal", "__pycache__"} for part in Path(relative).parts):
             continue
         count += 1

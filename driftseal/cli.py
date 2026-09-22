@@ -7,8 +7,8 @@ from pathlib import Path
 
 from . import RULESET, __version__
 from .diff import compare, sarif
-from .safety import Rejected, canonical
-from .scanner import scan_local, scan_manifest, scan_remote
+from .runner import isolated_scan
+from .safety import Rejected, canonical, verified_tls_context
 
 
 def config_path():
@@ -35,28 +35,28 @@ def cloud(method, path, payload=None):
         method=method,
     )
     # No redirect may carry the account token to another endpoint.
-    from urllib.request import HTTPRedirectHandler, build_opener
+    from urllib.request import HTTPRedirectHandler, HTTPSHandler, build_opener
 
     class NoRedirect(HTTPRedirectHandler):
         def redirect_request(self, *args, **kwargs):
             raise Rejected("Cloud redirect rejected")
 
-    with build_opener(NoRedirect).open(request, timeout=30) as response:
+    with build_opener(NoRedirect, HTTPSHandler(context=verified_tls_context())).open(request, timeout=30) as response:
         return json.load(response)
 
 
 def scan_target(target, kind=None):
     if target == "-":
-        return scan_manifest(sys.stdin.read(1024 * 1024 + 1))
+        return isolated_scan({"kind": "manifest", "content": sys.stdin.read(1024 * 1024 + 1)})
     if Path(target).exists():
-        return scan_local(target)
+        return isolated_scan({"kind": "local", "target": str(Path(target).absolute())})
     if kind:
-        return scan_remote(kind, target)
+        return isolated_scan({"kind": kind, "target": target})
     if target.startswith("https://github.com/"):
-        return scan_remote("github", target)
+        return isolated_scan({"kind": "github", "target": target})
     if target.startswith("pypi:"):
-        return scan_remote("pypi", target[5:])
-    return scan_remote("npm", target.removeprefix("npm:"))
+        return isolated_scan({"kind": "pypi", "target": target[5:]})
+    return isolated_scan({"kind": "npm", "target": target.removeprefix("npm:")})
 
 
 def main(argv=None):

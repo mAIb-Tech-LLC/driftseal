@@ -107,17 +107,21 @@ def validate_url(url, allowed_hosts=None):
     return parsed, host
 
 
+def verified_tls_context():
+    # Use the OS CA bundle for python.org macOS installations without their own trust store.
+    cafile = (
+        "/etc/ssl/cert.pem"
+        if sys.platform == "darwin"
+        and not ssl.get_default_verify_paths().cafile
+        and Path("/etc/ssl/cert.pem").is_file()
+        else None
+    )
+    return ssl.create_default_context(cafile=cafile)
+
+
 class PinnedHTTPS(http.client.HTTPSConnection):
     def __init__(self, hostname, ip, timeout):
-        # python.org macOS installations can lack their own CA file. Use the OS trust bundle, never disable verification.
-        cafile = (
-            "/etc/ssl/cert.pem"
-            if sys.platform == "darwin"
-            and not ssl.get_default_verify_paths().cafile
-            and Path("/etc/ssl/cert.pem").is_file()
-            else None
-        )
-        super().__init__(hostname, timeout=timeout, context=ssl.create_default_context(cafile=cafile))
+        super().__init__(hostname, timeout=timeout, context=verified_tls_context())
         self.pinned_ip = ip
 
     def connect(self):
