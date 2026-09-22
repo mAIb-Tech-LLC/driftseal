@@ -55,3 +55,17 @@ def test_action_fixture(tmp_path):
     assert result.returncode == 0, result.stderr
     assert (tmp_path / "driftseal-results/result.sarif").exists()
     assert "DriftSeal" in (tmp_path / "summary.md").read_text()
+
+
+def test_watch_handoff_preserves_private_identity_and_json(tmp_path, capsys):
+    from driftseal.conversion import watch_url
+
+    private = tmp_path / "confidential-client-manifest.json"
+    private.write_text('{"tools":[]}')
+    url = watch_url({"target_type": "local", "identifier": str(private)})
+    assert "target=" not in url and "confidential" not in url
+    assert main(["scan", str(private), "--json"]) == 0
+    output = capsys.readouterr()
+    assert json.loads(output.out)["tools"] == []
+    assert "WATCH" not in output.err
+    assert "kind=npm&target=is-number" in watch_url({"target_type": "npm", "identifier": "is-number"})
