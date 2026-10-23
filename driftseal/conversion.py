@@ -2,6 +2,8 @@
 
 from urllib.parse import urlencode
 
+BASELINE_DOCS = "https://github.com/mAIb-Tech-LLC/driftseal#cli-approve-a-baseline-then-review-the-diff"
+
 
 def watch_url(report=None, source="cli"):
     params = {"source": source}

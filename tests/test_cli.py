@@ -1,9 +1,13 @@
 import json
 import os
+import re
 import subprocess
 import sys
+from pathlib import Path
 
+from driftseal import __version__
 from driftseal.cli import main
+from driftseal.conversion import BASELINE_DOCS
 from driftseal.runner import isolated_scan
 
 
@@ -54,7 +58,32 @@ def test_action_fixture(tmp_path):
     result = subprocess.run([sys.executable, "scripts/action_scan.py"], env=env, capture_output=True)
     assert result.returncode == 0, result.stderr
     assert (tmp_path / "driftseal-results/result.sarif").exists()
-    assert "DriftSeal" in (tmp_path / "summary.md").read_text()
+    summary = (tmp_path / "summary.md").read_text()
+    assert "DriftSeal" in summary
+    assert BASELINE_DOCS in summary and "drift.maib.io" not in summary and "WATCH" not in summary
+
+
+def test_text_output_links_only_to_documentation(tmp_path, capsys):
+    source = tmp_path / "manifest.json"
+    source.write_text('{"tools":[]}')
+    baseline = tmp_path / "approved.json"
+    for argv in (["scan", str(source)], ["baseline", str(source), "--output", str(baseline)], ["diff", str(baseline), str(baseline)]):
+        assert main(argv) == 0
+        err = capsys.readouterr().err
+        assert BASELINE_DOCS in err and "drift.maib.io" not in err and "WATCH" not in err, argv
+
+
+def test_baseline_docs_link_matches_readme_heading():
+    anchor = BASELINE_DOCS.split("#", 1)[1]
+    headings = re.findall(r"^#+ (.+)$", (Path(__file__).parents[1] / "README.md").read_text(), re.MULTILINE)
+    assert anchor in {re.sub(r"[^a-z0-9 -]", "", h.lower()).replace(" ", "-") for h in headings}
+
+
+def test_sarif_reports_package_version(tmp_path, capsys):
+    source = tmp_path / "manifest.json"
+    source.write_text('{"tools":[]}')
+    assert main(["scan", str(source), "--sarif"]) == 0
+    assert json.loads(capsys.readouterr().out)["runs"][0]["tool"]["driver"]["version"] == __version__
 
 
 def test_watch_handoff_preserves_private_identity_and_json(tmp_path, capsys):

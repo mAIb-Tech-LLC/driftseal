@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 — 2026-10-23
+
+- The Action's job summary and the CLI's text output link to this repository's baseline documentation instead of the hosted scanner.
+- SARIF output reports the package version instead of a fixed `0.1.0`.
+- docs/CLI.md: source installation stated exactly; the Node launcher tarball is described as a release asset, not an npm package; hosted-service commands are labelled.
+- No scanner, ruleset, input or output-format changes.
+
 ## 0.1.0 — 2026-09-21
 
 - Deterministic artifact and tool baselines; 24 named drift classes with evidence.
