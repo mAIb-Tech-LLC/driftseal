@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.1 — unreleased (release candidate)
+## 0.1.1 — 2026-10-23
 
 - The Action's job summary and the CLI's text output link to this repository's baseline documentation instead of the hosted scanner.
 - SARIF output reports the package version instead of a fixed `0.1.0`.
