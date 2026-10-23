@@ -174,12 +174,11 @@ def main(argv=None):
         else:
             print(rendered)
         if args.command in {"scan", "baseline", "diff"} and not args.json and not args.sarif:
-            from .conversion import watch_url
+            from .conversion import BASELINE_DOCS
 
-            report = new if args.command == "diff" else result
             print(
-                "\nA point-in-time scan does not provide continuous monitoring.\nWant to know when this changes later? WATCH THIS COMPONENT: "
-                + watch_url(report),
+                "\nA point-in-time scan does not detect later changes. To review drift, approve a baseline: "
+                + BASELINE_DOCS,
                 file=sys.stderr,
             )
         levels = {"none": 99, "info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}

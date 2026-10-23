@@ -4,7 +4,7 @@ import json
 import os
 from pathlib import Path
 
-from driftseal.conversion import watch_url
+from driftseal.conversion import BASELINE_DOCS
 from driftseal.diff import compare, sarif
 from driftseal.runner import isolated_scan
 
@@ -26,9 +26,9 @@ if os.getenv("GITHUB_STEP_SUMMARY"):
             out.write(f"- **{item['severity'].upper()}** `{item['type']}`\n")
         out.write("\nReview the JSON/SARIF artifact for evidence. A clean scan does not guarantee security.\n")
         out.write(
-            "\nA point-in-time scan is not continuous trust monitoring. Want to know when this changes later?\n\n[WATCH THIS COMPONENT]("
-            + watch_url(source="github-action")
-            + ") · [Approve a baseline](https://drift.maib.io/docs/github-action?source=github-action)\n\nLocal source and detailed findings are never uploaded to DriftSeal. Anonymous stage reporting is disabled unless explicitly enabled. The link opens the public-component workflow; private repositories stay local.\n"
+            "\nA point-in-time scan does not detect later changes. To review drift, commit an approved baseline: [Approve a baseline]("
+            + BASELINE_DOCS
+            + ")\n\nLocal source and detailed findings are never uploaded to DriftSeal. Anonymous stage reporting is disabled unless explicitly enabled.\n"
         )
 levels = {"none": 99, "info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
 if os.getenv("DRIFTSEAL_TELEMETRY", "false").lower() == "true":

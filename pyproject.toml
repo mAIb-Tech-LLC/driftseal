@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 [project]
 name = "driftseal"
-version = "0.1.0"
+version = "0.1.1"
 description = "Deterministic trust drift evidence for agent supply chains"
 requires-python = ">=3.12"
 license = "Apache-2.0"

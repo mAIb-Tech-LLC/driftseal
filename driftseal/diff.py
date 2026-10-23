@@ -1,3 +1,4 @@
+from . import __version__
 from .rules import HIGH_IMPACT, finding
 from .safety import Rejected, digest
 
@@ -236,7 +237,7 @@ def sarif(findings):
         "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
         "runs": [
             {
-                "tool": {"driver": {"name": "DriftSeal", "version": "0.1.0"}},
+                "tool": {"driver": {"name": "DriftSeal", "version": __version__}},
                 "results": [
                     {
                         "ruleId": f["type"],

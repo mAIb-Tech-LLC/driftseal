@@ -70,6 +70,6 @@ Automatic telemetry is **off by default**. To contribute anonymous stage counts,
 
 DriftSeal's hosted service (recurring monitoring of public components, history, badges and the `driftseal login`/`watch` commands) is a separate commercial product at drift.maib.io with its own terms. Nothing in this README describes its availability, reliability or pricing. Hosted watches need a public retrievable package, repository or compatible MCP metadata endpoint; private source stays local. Publishing a status badge is opt-in, and a badge is monitoring evidence, not a security certification.
 
-The Action's job summary and the CLI's text output include a link to the hosted service. Following it is optional; the Action and CLI results do not depend on it.
+In DriftSeal 0.1.0, the Action's job summary and the CLI's text output include a link to the hosted service; following it is optional and the results do not depend on it. From 0.1.1 they link only to this repository's baseline documentation.
 
 Apache-2.0 scanner, CLI and Action. A mAIb Tech product. A clean result means only that no material issue or drift was detected by the active ruleset and available coverage; it does not guarantee software security.
