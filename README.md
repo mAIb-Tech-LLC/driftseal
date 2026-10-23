@@ -2,9 +2,16 @@
 
 **Know when an MCP server, agent skill or tool changes after you trusted it.**
 
-A point-in-time scan checks what is there now. An approved baseline makes later changes reviewable. Continuous WATCH monitoring checks public components between commits.
+A point-in-time scan checks what is there now. An approved baseline makes later changes reviewable.
 
-## Add the GitHub Action in one minute
+This repository provides two free, Apache-2.0 tools that run on your own machine or CI runner:
+
+- **GitHub Action** (`mAIb-Tech-LLC/driftseal@v1`): static checks and baseline comparison inside GitHub Actions.
+- **CLI** (`driftseal`): the same scanner from a terminal, installed from this repository's source.
+
+DriftSeal also has a separate, commercial hosted service. It is not part of the Action or CLI, is not needed to use them, and is not covered by this README; see [Hosted service](#hosted-service-separate).
+
+## GitHub Action
 
 Save this as `.github/workflows/driftseal.yml`. Set `path` to your agent tool/skill directory or JSON manifest.
 
@@ -31,9 +38,11 @@ jobs:
 
 No cloud signup or token. The Action sets up Python 3.12, reads the target without installing or executing it, and produces a job summary, evidence JSON and SARIF. Critical findings fail the job; artifacts remain available. Start without a baseline for static findings. Prefer a reviewed commit pin for stronger provenance.
 
-## Approve a baseline, then review the diff
+Inputs: `path`, `baseline` (default `.driftseal-baseline.json`), `fail-on` (default `critical`), `telemetry` (default `'false'`) and `installation-id`. Outputs: `result` (JSON path) and `sarif` (SARIF path). See [`action.yml`](action.yml).
 
-Requires Python **3.12+**, Linux or macOS:
+## CLI: approve a baseline, then review the diff
+
+Requires Python **3.12+**, Linux or macOS. Install from source:
 
 ```sh
 python3 -m pip install 'git+https://github.com/mAIb-Tech-LLC/driftseal@v1'
@@ -43,30 +52,24 @@ driftseal baseline ./agent-tools --output .driftseal-baseline.json
 
 Review and commit the baseline. The Action automatically uses `.driftseal-baseline.json` when present. Changes to tools, descriptions, schemas, permissions, dependencies and artifacts appear with old/new evidence and severity. Reapprove deliberately; never regenerate the baseline automatically on every run. Keep the same target directory name locally and in CI.
 
-Exit codes: **0** below threshold, **1** severity threshold reached, **2** operation failed. `--json`, `--sarif` and `--fail-on critical` work locally without signup.
+Exit codes: **0** below threshold, **1** severity threshold reached, **2** operation failed. `--json`, `--sarif` and `--fail-on critical` work locally without signup. More commands and privacy details: [CLI/privacy](docs/CLI.md).
 
-## Want to know when this changes later?
+**Release tarball (alternative).** The [v0.1.0 release](https://github.com/mAIb-Tech-LLC/driftseal/releases/tag/v0.1.0) attaches `maib-driftseal-0.1.0.tgz`, a Node launcher for the 0.1.0 scanner. It requires Node 18+ **and Python 3.12+**, and it predates `v1`, so prefer the source installation above. After download, check its SHA-256 (`80765ac61cc8a482bdb64cc44aaf50ea0c93194b3d7cd7b50e907e916a06f872`), extract it and run `node package/bin.cjs version`. It is not published to the npm registry. No zero-dependency installation claim is made.
 
-[**WATCH THIS COMPONENT →**](https://drift.maib.io/?source=github-readme#scanner)
-
-WATCH is $9/month for 10 public components checked daily. PRO is $29 for 50 components every six hours. TEAM is $79 for 250 components. Scan, inspect evidence, choose WATCH, sign in and complete checkout. Monitoring starts automatically after payment. The free Action remains useful independently.
-
-Private source stays local. Hosted recurring watches need a public retrievable package, repository or compatible MCP metadata endpoint. The Action never sends your repository name, source or findings to DriftSeal.
-
-## Optional adoption measurement
-
-Automatic telemetry is **off by default**. To contribute anonymous stage counts, set `telemetry: 'true'`. The payload contains a fresh random run ID, a boolean indicating whether a baseline was compared, and an optional random UUID supplied in `installation-id`. Never use a repository name as that ID. No target coordinate, filenames, source, findings or credentials are transmitted. Reporting failure never changes the security result. Without opt-in, DriftSeal cannot count your installation or runs; clicked WATCH links provide referral attribution.
-
-## Public badge without public findings
-
-In the hosted console, choose **Publish status** on a watch, then open **Badge** and copy the Markdown. Publishing is opt-in. The badge links to the last-check timestamp, active ruleset and minimal status. Detailed findings remain private. Unpublish at any time. A badge is monitoring evidence, not a security certification.
-
-## Coverage and installation
+## Coverage
 
 Public npm/PyPI artifacts, immutable GitHub commit archives, bounded archives, local paths and explicit JSON tool manifests are supported. Stateless public MCP `tools/list` is supported without tool execution. Dynamic tool generation, authenticated/stateful MCP, YAML structure, binary behavior and transitive dependency resolution are outside coverage.
 
-The npm launcher requires Node 18+ **and Python 3.12+**. It is not yet published to the npm registry; use the source installation above. No zero-dependency installation claim is made.
+Private source stays local. The Action never sends your repository name, source or findings to DriftSeal, and local CLI scans of paths and stdin never upload source or scan telemetry. [Security model](docs/SECURITY_MODEL.md).
 
-[Action guide](https://drift.maib.io/docs/github-action?source=github-readme) · [CLI/privacy](docs/CLI.md) · [Security model](docs/SECURITY_MODEL.md) · [Continuous monitoring](https://drift.maib.io/mcp-drift-monitoring?source=github-readme)
+## Optional adoption measurement
 
-Apache-2.0 scanner, CLI and Action. Hosted operations/history are commercial. A mAIb Tech product. A clean result means only that no material issue or drift was detected by the active ruleset and available coverage; it does not guarantee software security.
+Automatic telemetry is **off by default**. To contribute anonymous stage counts, set `telemetry: 'true'`. The payload contains a fresh random run ID, a boolean indicating whether a baseline was compared, and an optional random UUID supplied in `installation-id`. Never use a repository name as that ID. No target coordinate, filenames, source, findings or credentials are transmitted. Reporting failure never changes the security result. Without opt-in, DriftSeal cannot count your installation or runs.
+
+## Hosted service (separate)
+
+DriftSeal's hosted service (recurring monitoring of public components, history, badges and the `driftseal login`/`watch` commands) is a separate commercial product at drift.maib.io with its own terms. Nothing in this README describes its availability, reliability or pricing. Hosted watches need a public retrievable package, repository or compatible MCP metadata endpoint; private source stays local. Publishing a status badge is opt-in, and a badge is monitoring evidence, not a security certification.
+
+The Action's job summary and the CLI's text output include a link to the hosted service. Following it is optional; the Action and CLI results do not depend on it.
+
+Apache-2.0 scanner, CLI and Action. A mAIb Tech product. A clean result means only that no material issue or drift was detected by the active ruleset and available coverage; it does not guarantee software security.
